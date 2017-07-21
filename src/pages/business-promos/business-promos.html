@@ -1,0 +1,28 @@
+<!--
+  Generated template for the BusinessPromosPage page.
+
+  See http://ionicframework.com/docs/components/#navigation for more info on
+  Ionic pages and navigation.
+-->
+<ion-header>
+
+  <ion-navbar>
+    <ion-title>businessPromos</ion-title>
+  </ion-navbar>
+
+</ion-header>
+
+
+<ion-content padding>
+
+  <ion-list>
+    <button ion-item *ngFor="let promo of promos | async" (click)="viewPromo(promo)">
+
+<h1>name :  {{promo.name}}</h1>
+<h2>description  :{{promo.description}}</h2>
+   
+  </button>
+  </ion-list>
+
+
+</ion-content>

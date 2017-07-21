@@ -1,0 +1,32 @@
+<ion-header>
+  <ion-navbar>
+    <button ion-button menuToggle>
+      <ion-icon name="menu"></ion-icon>
+    </button>
+    <ion-title>Add Promo</ion-title>
+  </ion-navbar>
+</ion-header>
+
+
+<ion-content padding>
+  <div *ngIf="currentUser">
+
+    <h1 style="color:white">{{currentUser.name}} | {{currentUser.userType}}</h1>
+
+
+    <ion-list>
+      <ion-item no-lines>
+        <ion-label>Promo Name</ion-label>
+        <ion-input [(ngModel)]="promo.title" type="text"  placeholder="Name"></ion-input>
+      </ion-item>
+      <ion-item no-lines>
+        <ion-label>Promo Description</ion-label>
+        <ion-input [(ngModel)]="promo.description" type="text"  placeholder="Description"></ion-input>
+      </ion-item>
+
+    </ion-list>
+    <button ion-button icon-left class="dark" tappable (click)="newPromo()"><ion-icon name="md-log-in"></ion-icon>New Promo</button>
+
+
+  </div>
+</ion-content>

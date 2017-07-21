@@ -15,6 +15,7 @@ $app-direction: ltr;
 @import "ionic.globals";
 
 
+
 // Shared Variables
 // --------------------------------------------------
 // To customize the look and feel of this app, you can override
@@ -41,6 +42,65 @@ $colors: (
   dark:       #222
 );
 
+
+// Color Variables
+$primary: #ffca28;
+$primary-active: #ffd75b;
+$secondary: #55acee;
+$secondary-active: #6acdff;
+$dark: #333;
+$dark-active: #4c4c4c;
+$gray: #c3c3c3;
+$facebook: #3052a8;
+$facebook-active: #345cc0;
+$google: #dd4b39;
+$google-active: #ff563f;
+
+// Set header bar color to our primary color
+$toolbar-background: $primary;
+$fab-content-margin: 0;
+
+$refresher-border-color: rgba(0, 0, 0, 0);
+// $refresher-icon-color: $primary;
+// $refresher-text-color: $primary;
+// App iOS Variables
+// --------------------------------------------------
+// iOS only Sass variables can go here
+$loading-ios-background: rgba(0, 0, 0, 0.5);
+$loading-ios-spinner-color: #fff;
+$toolbar-ios-title-text-color: #fff;
+$tabs-ios-tab-icon-color: $gray;
+$tabs-ios-tab-icon-color-active: $primary;
+$tabs-ios-tab-icon-size: 28px;
+$tabs-ios-border: 0;
+$searchbar-ios-input-clear-icon-color: $primary;
+$searchbar-ios-input-clear-icon-size: 22px;
+
+// App Material Design Variables
+// --------------------------------------------------
+// Material Design only Sass variables can go here
+$loading-md-background: rgba(0, 0, 0, 0.5);
+$loading-md-spinner-color: #fff;
+$toolbar-md-title-text-color: #fff;
+$tabs-md-tab-icon-color: $gray;
+$tabs-md-tab-icon-color-active: $primary;
+$tabs-md-tab-icon-size: 28px;
+$tabs-md-border: 0;
+$searchbar-md-input-clear-icon-color: $primary;
+$searchbar-md-input-clear-icon-size: 22px;
+
+// App Windows Variables
+// --------------------------------------------------
+// Windows only Sass variables can go here
+$loading-wp-background: rgba(0, 0, 0, 0.5);
+$loading-wp-spinner-color: #fff;
+$toolbar-wp-title-text-color: #fff;
+$tabs-wp-tab-icon-color: $gray;
+$tabs-wp-tab-icon-color-active: $primary;
+$tabs-wp-tab-icon-size: 28px;
+$tabs-wp-border: 0;
+$searchbar-wp-input-clear-icon-color: $primary;
+$searchbar-wp-input-clear-icon-size: 22px;
 
 // App iOS Variables
 // --------------------------------------------------

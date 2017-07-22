@@ -8,30 +8,23 @@ import { UserDataProvider } from '../user-data/user-data'
 import { Subject } from 'rxjs/Subject';
 import { Observable } from 'rxjs/Observable';
 
+import { Subscription } from "rxjs/Subscription";
+
 import 'rxjs/add/operator/takeUntil';
 
-/*
-  Generated class for the AuthProvider provider.
-
-  See https://angular.io/docs/ts/latest/guide/dependency-injection.html
-  for more info on providers and Angular DI.
-*/
 @Injectable()
 export class AuthProvider {
 
-  private destroy$: Subject<any> 
-
+  private subscriptions: Subscription[] = [];
 
   constructor(private afAuth: AngularFireAuth, public db: AngularFireDatabase,
     public userProvider: UserDataProvider) {
-      this.destroy$ = new Subject<any>();
-      console.log("created auth")
+    console.log("created auth")
   }
 
   public isAuthenticated() {
     return new Promise((resolve, reject) => {
       this.afAuth.authState.take(1).subscribe(user => {
-        //console.log("user", user)
         if (user) {
           resolve(user);
         } else {
@@ -47,14 +40,14 @@ export class AuthProvider {
     return new Promise((resolve, reject) => {
       this.isAuthenticated()
         .then(user => {
-          this.userProvider.getUser(user["uid"]).takeUntil(this.destroy$).subscribe(searchedUser => {
-          //  console.log(searchedUser)
-            if (searchedUser.userType === "business") {
-              resolve(searchedUser);
-            } else {
-              reject("No Access from is business");
-            }
-          })
+          this.subscriptions
+            .push(this.userProvider.getUser(user["uid"]).subscribe(searchedUser => {
+              if (searchedUser.userType === "business") {
+                resolve(searchedUser);
+              } else {
+                reject("No Access from is business");
+              }
+            }));
         }).catch(err => {
           reject(err);
         });
@@ -63,11 +56,10 @@ export class AuthProvider {
 
 
   public dispose() {
-    console.log("dispose auth")
-    // this.destroy$.next(true);
-    // this.destroy$.unsubscribe();
+    this.subscriptions.forEach(item => {
+      item.unsubscribe();
+    });
+    this.subscriptions.length = 0;
   }
-
-
 
 }

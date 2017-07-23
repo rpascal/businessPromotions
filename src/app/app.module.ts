@@ -19,6 +19,7 @@ import { Facebook } from '@ionic-native/facebook';
 import { UserDataProvider } from '../providers/user-data/user-data';
 import { PromosDataProvider } from '../providers/promos-data/promos-data';
 import { BusinessesDataProvider } from '../providers/businesses-data/businesses-data';
+import { Geolocation } from '@ionic-native/geolocation';
 
 
 
@@ -49,6 +50,7 @@ import { BusinessesDataProvider } from '../providers/businesses-data/businesses-
     UserDataProvider,
     PromosDataProvider,
     BusinessesDataProvider,
+    Geolocation
   ]
 })
 export class AppModule { }

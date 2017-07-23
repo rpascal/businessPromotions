@@ -11,7 +11,7 @@ import { LoginProvider } from '../providers/login/login'
 export class MyApp {
   @ViewChild(Nav) nav: Nav;
 
-  rootPage: any;
+  rootPage: any = "home";
 
   pages: Array<{ title: string, component: any }>;
 
@@ -26,19 +26,22 @@ export class MyApp {
       // { title: 'List', component: "ListPage" },
       { title: 'Log Off', component: "LogOff" },
       { title: 'Add Promo', component: "AddPromoPage" },
-       { title: 'View Businesses', component: "ViewBusinessesPage" },
+      { title: 'View Businesses', component: "ViewBusinessesPage" },
+      { title: 'View Map', component: "LocationSelectPage" },
     ];
 
   }
 
   initializeApp() {
 
-    this.afAuth.authState.subscribe(auth => {
-      // console.log(auth)
-      if (auth)
-        this.rootPage = "home";
-      else
+    this.afAuth.authState.take(1).subscribe(auth => {
+      if (!auth) {
         this.rootPage = "LoginPage";
+      }
+      // if (auth)
+      //   this.rootPage = "home";
+      // else
+      //   this.rootPage = "LoginPage";
     });
 
 

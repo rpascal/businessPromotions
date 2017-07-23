@@ -21,21 +21,10 @@ export class GoogleMapComponent {
   init(): Promise<any> {
     return new Promise<any>((resolve, reject) => {
       this.maps.init(this.mapElement.nativeElement, this.pleaseConnect.nativeElement, this.navCtrl).then(() => {
-
-        // let latLng = new google.maps.LatLng(41.060029, -82.0243551);
-        // this.maps.addMarker(latLng)
-
         resolve(this.maps.map)
-        // this.geolocation.getCurrentPosition().then((position) => {
-        //   console.log("position")
-        //   let latLng = new google.maps.LatLng(41.060029, -82.0243551);
-        //   this.maps.addMarker(latLng)
-        // });
       }).catch(err=>{
         reject(err);
       });
-
-
     })
 
   }

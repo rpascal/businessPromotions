@@ -45,7 +45,7 @@ export class BusinessesDataProvider {
 
 
 
-  getBusinessList(): Promise<any> {
+  getBusinessList(currentPosition): Promise<any> {
 
     if (this.businesses.length > 0) {
       console.log("exists")
@@ -55,21 +55,27 @@ export class BusinessesDataProvider {
       return new Promise<any>((resolve, reject) => {
         this.subscriptions.push(this.db.list(`${this.root}`).subscribe(data => {
 
-          console.log("data", data)
-
+          //           alert("data")
+          //resolve(data);
           // this.businesses = data;
           // let temp = data;
-          this.applyHaversine(data).then(newData => {
+          //this.geolocation.getCurrentPosition().then(res => {
 
-            data.sort((locationA, locationB) => {
-              return locationA.distance - locationB.distance;
+            this.applyHaversine(data, currentPosition).then(newData => {
+
+              data.sort((locationA, locationB) => {
+                return locationA.distance - locationB.distance;
+              });
+              this.businesses = data;
+
+              resolve(this.businesses);
+            }).catch(err => {
+              reject(err)
             });
-            this.businesses = data;
 
-            resolve(this.businesses);
-          }).catch(err => {
-            reject(err)
-          });
+//          });
+
+
 
         }))
 
@@ -79,13 +85,13 @@ export class BusinessesDataProvider {
   }
 
 
-  applyHaversine(locations) {
+  applyHaversine(locations, currentLocation) {
     return new Promise((resolve, reject) => {
-      this.geolocation.getCurrentPosition().then(res => {
-        console.log("pos", res)
+     // this.geolocation.getCurrentPosition().then(res => {
+     //   console.log("pos", res)
         let usersLocation = {
-          lat: res.coords.latitude,
-          lng: res.coords.longitude
+          lat: currentLocation.coords.latitude,
+          lng: currentLocation.coords.longitude
         };
 
         locations.map((location) => {
@@ -104,7 +110,7 @@ export class BusinessesDataProvider {
 
         resolve(locations); // As soon as this is called, the "then" in will be executed in the function below.
 
-      }).catch(reject);
+     // }).catch(reject);
     });
   }
   getDistanceBetweenPoints(start, end, units) {

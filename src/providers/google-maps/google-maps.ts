@@ -9,7 +9,7 @@ declare var google;
 export class GoogleMapsProvider {
 
 
-  navCtrl : any;
+  navCtrl: any;
 
   mapElement: any;
   pleaseConnect: any;
@@ -48,10 +48,11 @@ export class GoogleMapsProvider {
           window['mapInit'] = () => {
 
             this.initMap().then(() => {
+              this.enableMap();
               resolve(true);
             });
 
-            this.enableMap();
+
           }
 
           let script = document.createElement("script");
@@ -93,21 +94,12 @@ export class GoogleMapsProvider {
     this.mapInitialised = true;
 
     return new Promise((resolve) => {
-
-      this.geolocation.getCurrentPosition().then((position) => {
-
-        let latLng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
         let mapOptions = {
-          center: latLng,
           zoom: 14,
           mapTypeId: google.maps.MapTypeId.ROADMAP
         }
         this.map = new google.maps.Map(this.mapElement, mapOptions);
-
         resolve(true);
-
-      });
-
     });
 
   }
@@ -133,7 +125,8 @@ export class GoogleMapsProvider {
 
     var marker = new google.maps.Marker({
       position: latLon,
-      //animation: google.maps.Animation.DROP,
+      animation: google.maps.Animation.DROP,
+      visible : true
       // title: "Hello World!"
     });
 
@@ -157,8 +150,8 @@ export class GoogleMapsProvider {
     });
     google.maps.event.addListenerOnce(infoWindow, 'domready', () => {
       document.getElementById(business._uid).addEventListener('click', () => {
-       // alert(business.name);
-        this.navCtrl.push("BusinessPromosPage",{key : business._uid});
+        // alert(business.name);
+        this.navCtrl.push("BusinessPromosPage", { key: business._uid });
       });
     });
 
@@ -169,7 +162,8 @@ export class GoogleMapsProvider {
     let latLng = new google.maps.LatLng(business.lat, business.lng);
     var marker = new google.maps.Marker({
       position: latLng,
-      //animation: google.maps.Animation.DROP,
+      animation: google.maps.Animation.DROP,
+      visible : true
       // title: "Hello World!"
     });
 

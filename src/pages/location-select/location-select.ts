@@ -6,6 +6,10 @@ import { GoogleMapComponent } from '../../components/google-map/google-map'
 import { GoogleMapPlacesProvider } from '../../providers/google-map-places/google-map-places'
 import { BusinessesDataProvider } from '../../providers/businesses-data/businesses-data'
 
+import { Geolocation } from '@ionic-native/geolocation';
+
+import { ToastController } from 'ionic-angular';
+
 declare var google;
 
 @IonicPage()
@@ -20,9 +24,10 @@ export class LocationSelectPage {
   places: any = [];
   query: string;
 
-  constructor(public navCtrl: NavController, public zone: NgZone,
+  constructor(public navCtrl: NavController, public zone: NgZone, private toastCtrl: ToastController,
     public platform: Platform, public googleMapPlaces: GoogleMapPlacesProvider,
-    public bdp: BusinessesDataProvider) {
+    public bdp: BusinessesDataProvider,
+    public geolocation: Geolocation) {
   }
 
 
@@ -35,6 +40,87 @@ export class LocationSelectPage {
     })
 
   }
+
+
+
+  ionViewDidLoad(): void {
+
+    console.log("load")
+    this.geolocation.getCurrentPosition().then(currentLocation => {
+
+      //this.presentToast(currentLocation)
+
+      this.mapElement.init().then(map => {
+        this.googleMapPlaces.init(map);
+
+        // this.mapElement.setCenter(currentLocation.coords.latitude, currentLocation.coords.longitude)
+        
+        //default position to where the markers will show up
+        this.mapElement.setCenter(41.059481, -82.023820)
+        
+
+        this.bdp.getBusinessList(currentLocation).then(business => {
+          business.forEach(element => {
+            this.zone.run(() => {
+              this.mapElement.maps.addBusinessMarker(element)
+              // this.presentToast("done")
+            })
+
+          });
+
+
+
+
+        });
+
+
+
+      });
+
+    }).catch(err => {
+      this.presentToast(err)
+    });
+
+
+
+
+  }
+
+  selectPlace(place) {
+
+    this.googleMapPlaces.getSelectedPlaceDetails(place).then(res => {
+      this.zone.run(() => {
+        this.places = [];
+        this.mapElement.setCenter(res.lat, res.lng)
+      });
+
+    });
+
+
+  }
+
+
+  ngOnDestroy() {
+    console.log('destroy')
+    this.bdp.dispose();
+
+  }
+
+
+  presentToast(message) {
+    let toast = this.toastCtrl.create({
+      message: message,
+      duration: 2000,
+      position: 'bottom'
+    });
+
+    toast.onDidDismiss(() => {
+      console.log('Dismissed toast');
+    });
+
+    toast.present();
+  }
+
 
   generateRandomPoint(center, radius) {
     var x0 = center.lng;
@@ -61,59 +147,6 @@ export class LocationSelectPage {
       points.push(this.generateRandomPoint(center, radius));
     }
     return points;
-  }
-
-  ionViewDidLoad(): void {
-
-    console.log("load")
-
-    this.mapElement.init().then(map => {
-      this.googleMapPlaces.init(map);
-
-      var randomGeoPoints = this.generateRandomPoints({ 'lat': 41.060029, 'lng': -82.0243551 }, 1000, 100);
-
-
-      // randomGeoPoints.forEach(point => {
-      //   let latLng = new google.maps.LatLng(point.lat, point.lng);
-      //   this.mapElement.maps.addMarker(latLng)
-      //   //console.log(point)
-      // })
-
-      this.bdp.getBusinessList().then(business => {
-        console.log(business)
-
-        business.forEach(element => {
-          // let latLng = new google.maps.LatLng(element.lat, element.lng);
-          this.mapElement.maps.addBusinessMarker(element)
-        });
-
-        // this.bdp.getBusinessList().then(business2 => {
-        //   console.log(business)
-
-        // });
-      });
-
-    });
-  }
-
-  selectPlace(place) {
-
-    this.googleMapPlaces.getSelectedPlaceDetails(place).then(res => {
-      this.zone.run(() => {
-        this.places = [];
-        this.mapElement.setCenter(res.lat, res.lng)
-      });
-
-    });
-
-
-  }
-
-
-  ngOnDestroy() {
-    console.log('destroy')
-    this.bdp.dispose();
-
   }
 
 

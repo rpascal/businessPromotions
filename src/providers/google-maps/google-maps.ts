@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Platform } from 'ionic-angular';
 import { ConnectivityServiceProvider } from '../connectivity-service/connectivity-service';
-import { Geolocation } from '@ionic-native/geolocation';
 
 declare var google;
 
@@ -20,7 +19,7 @@ export class GoogleMapsProvider {
   currentMarker: any;
   apiKey: string = "AIzaSyAxKKrdC08TkrbHw5SNmQzhW6TareXXFwI";
 
-  constructor(public connectivityService: ConnectivityServiceProvider, public geolocation: Geolocation) {
+  constructor(public connectivityService: ConnectivityServiceProvider) {
 
   }
 

@@ -48,43 +48,45 @@ export class LocationSelectPage {
     console.log("load")
     this.geolocation.getCurrentPosition().then(currentLocation => {
 
-      //this.presentToast(currentLocation)
+      this.presentToast("Lat:" + currentLocation.coords.latitude + " long" + currentLocation.coords.longitude);
+      this.initializeMap({ lat: currentLocation.coords.latitude, lng: currentLocation.coords.longitude });
 
-      this.mapElement.init().then(map => {
-        this.googleMapPlaces.init(map);
-
-        // this.mapElement.setCenter(currentLocation.coords.latitude, currentLocation.coords.longitude)
-        
-        //default position to where the markers will show up
-        this.mapElement.setCenter(41.059481, -82.023820)
-        
-
-        this.bdp.getBusinessList(currentLocation).then(business => {
-          business.forEach(element => {
-            this.zone.run(() => {
-              this.mapElement.maps.addBusinessMarker(element)
-              // this.presentToast("done")
-            })
-
-          });
-
-
-
-
-        });
-
-
-
-      });
 
     }).catch(err => {
-      this.presentToast(err)
+      //41.059481, -82.023820
+      this.initializeMap({ lat: 41.059481, lng: -82.023820 });
+      this.presentToast("Default starting location used")
     });
 
 
 
 
   }
+
+  initializeMap(currentPosition: { lat: number, lng: number }) {
+    this.mapElement.init().then(map => {
+      this.googleMapPlaces.init(map);
+
+      //this.mapElement.setCenter(currentPosition.lat, currentPosition.lng)
+
+      //default position to where the markers will show up
+      this.mapElement.setCenter(41.059481, -82.023820)
+
+      this.bdp.getBusinessList(currentPosition).then(business => {
+        business.forEach(element => {
+          this.zone.run(() => {
+            this.mapElement.maps.addBusinessMarker(element)
+            // this.presentToast("done")
+          })
+
+        });
+
+      });
+
+    });
+
+  }
+
 
   selectPlace(place) {
 

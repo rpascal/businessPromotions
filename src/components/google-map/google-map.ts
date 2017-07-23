@@ -1,8 +1,6 @@
 import { NavController, Platform, ViewController, IonicPage } from 'ionic-angular';
 import { Component, ElementRef, ViewChild, NgZone } from '@angular/core';
-import { Geolocation } from '@ionic-native/geolocation';
 import { GoogleMapsProvider } from '../../providers/google-maps/google-maps';
-// import { PredictiveSearchComponent } from '../../components/predictive-search/predictive-search'
 declare var google;
 
 @Component({

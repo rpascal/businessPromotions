@@ -1,6 +1,12 @@
 import { Injectable } from '@angular/core';
+import { Events } from 'ionic-angular'
 import { Http } from '@angular/http';
 import 'rxjs/add/operator/map';
+import 'rxjs/add/observable/combineLatest';
+
+import 'rxjs/add/observable/merge';
+
+// import 'rxjs/add/operator/combine';
 import { AngularFireDatabase, FirebaseListObservable, FirebaseObjectObservable } from 'angularfire2/database';
 import { AngularFireAuth } from 'angularfire2/auth';
 import * as firebase from 'firebase/app';
@@ -8,6 +14,12 @@ import { BusinessModel } from '../../models/businessModel'
 
 import { Geolocation } from '@ionic-native/geolocation';
 import { Subscription } from "rxjs/Subscription";
+import { Observable } from "rxjs/Observable";
+import { Subject, SubjectSubscriber } from "rxjs/Subject";
+import { BehaviorSubject } from "rxjs/BehaviorSubject";
+
+
+// import { Observable } from "rxjs/Observable/";
 
 /*
   Generated class for the BusinessesDataProvider provider.
@@ -19,16 +31,23 @@ import { Subscription } from "rxjs/Subscription";
 export class BusinessesDataProvider {
 
   private root: string = "_businesses";
-
+  private location: BehaviorSubject<{ lat: number, lng: number }> = new BehaviorSubject({ lat: 41.059481, lng: -82.023820 });
   private businesses = [];
 
   private subscriptions: Subscription[] = [];
 
 
   constructor(
+    public events: Events,
     private afAuth: AngularFireAuth,
     public db: AngularFireDatabase,
     public geolocation: Geolocation) {
+  }
+
+
+  changeLocation(newLocation: { lat: number, lng: number }) {
+    console.log("chaneg locarion")
+    this.location.next(newLocation)
   }
 
 
@@ -43,65 +62,45 @@ export class BusinessesDataProvider {
 
   }
 
-
-
-  getBusinessList(currentPosition: { lat: number, lng: number }): Promise<any> {
-
-    if (this.businesses.length > 0) {
-      console.log("exists")
-      return Promise.resolve(this.businesses);
-    } else {
-      console.log("doesnt")
-      return new Promise<any>((resolve, reject) => {
-        this.subscriptions.push(this.db.list(`${this.root}`).subscribe(data => {
-
-
-          this.applyHaversine(data, currentPosition).then(newData => {
-
-            data.sort((locationA, locationB) => {
-              return locationA.distance - locationB.distance;
-            });
-            this.businesses = data;
-
-            resolve(this.businesses);
-          }).catch(err => {
-            reject(err)
-          });
-
-        }))
-
+  getBusinessData() {
+    return Observable.combineLatest(this.db.list(`${this.root}`), this.location, (x, y) => ({ x, y })).map(data => {
+      let temp = this.applyHaversine(data.x, data.y);
+      temp.sort((locationA, locationB) => {
+        return locationA.distance - locationB.distance;
       });
-    }
-
+      return temp.filter((item) => item.distance <= 50);
+      // return temp;
+    });
   }
 
-
   applyHaversine(locations, currentPosition: { lat: number, lng: number }) {
-    return new Promise((resolve, reject) => {
+    //return new Promise((resolve, reject) => {
 
-      let usersLocation = {
-        lat: currentPosition.lat,
-        lng: currentPosition.lng
+    let usersLocation = {
+      lat: currentPosition.lat,
+      lng: currentPosition.lng
+    };
+
+    locations.map((location) => {
+
+      let placeLocation = {
+        lat: location.lat,
+        lng: location.lng
       };
 
-      locations.map((location) => {
-
-        let placeLocation = {
-          lat: location.lat,
-          lng: location.lng
-        };
-
-        location.distance = this.getDistanceBetweenPoints(
-          usersLocation,
-          placeLocation,
-          'miles'
-        ).toFixed(2);
-      });
-
-      resolve(locations); // As soon as this is called, the "then" in will be executed in the function below.
-
-
+      location.distance = this.getDistanceBetweenPoints(
+        usersLocation,
+        placeLocation,
+        'miles'
+      ).toFixed(2);
     });
+
+    return locations;
+
+    // resolve(locations); // As soon as this is called, the "then" in will be executed in the function below.
+
+
+    // });
   }
   getDistanceBetweenPoints(start, end, units) {
 

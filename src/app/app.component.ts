@@ -28,6 +28,8 @@ export class MyApp {
       { title: 'Add Promo', component: "AddPromoPage" },
       { title: 'View Businesses', component: "ViewBusinessesPage" },
       { title: 'View Map', component: "LocationSelectPage" },
+      { title: 'Map Tab', component: "NearByTabsPage" },
+      
     ];
 
   }

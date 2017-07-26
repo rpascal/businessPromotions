@@ -1,4 +1,4 @@
-import { NavController, Platform, ViewController, IonicPage } from 'ionic-angular';
+import { NavController, Platform, ViewController, IonicPage, Events } from 'ionic-angular';
 import { Component, ElementRef, ViewChild, NgZone } from '@angular/core';
 
 import { GoogleMapComponent } from '../../components/google-map/google-map'
@@ -24,22 +24,13 @@ export class LocationSelectPage {
   places: any = [];
   query: string;
 
-  constructor(public navCtrl: NavController, public zone: NgZone, private toastCtrl: ToastController,
+  constructor(public events: Events, public navCtrl: NavController, public zone: NgZone, private toastCtrl: ToastController,
     public platform: Platform, public googleMapPlaces: GoogleMapPlacesProvider,
     public bdp: BusinessesDataProvider,
     public geolocation: Geolocation) {
   }
 
 
-  searchPlace() {
-    this.googleMapPlaces.search(this.query).then(res => {
-      this.zone.run(() => {
-        this.places = [];
-        this.places = res;
-      })
-    })
-
-  }
 
 
 
@@ -58,9 +49,6 @@ export class LocationSelectPage {
       this.presentToast("Default starting location used")
     });
 
-
-
-
   }
 
   initializeMap(currentPosition: { lat: number, lng: number }) {
@@ -68,19 +56,14 @@ export class LocationSelectPage {
       this.googleMapPlaces.init(map);
 
       //this.mapElement.setCenter(currentPosition.lat, currentPosition.lng)
-
       //default position to where the markers will show up
       this.mapElement.setCenter(41.059481, -82.023820)
 
-      this.bdp.getBusinessList(currentPosition).then(business => {
-        business.forEach(element => {
-          this.zone.run(() => {
-            this.mapElement.maps.addBusinessMarker(element)
-            // this.presentToast("done")
-          })
-
-        });
-
+      this.bdp.getBusinessData().subscribe(businesses => {
+        this.zone.run(() => {
+          this.mapElement.maps.addBusinessMarkers(businesses)
+          // this.presentToast("done")
+        })
       });
 
     });
@@ -88,14 +71,25 @@ export class LocationSelectPage {
   }
 
 
+  searchPlace() {
+    this.googleMapPlaces.search(this.query).then(res => {
+      this.zone.run(() => {
+        this.places = [];
+        this.places = res;
+      })
+    })
+
+  }
+
+
   selectPlace(place) {
 
     this.googleMapPlaces.getSelectedPlaceDetails(place).then(res => {
+      this.bdp.changeLocation({ lat: res.lat, lng: res.lng });
       this.zone.run(() => {
         this.places = [];
         this.mapElement.setCenter(res.lat, res.lng)
       });
-
     });
 
 
@@ -113,7 +107,7 @@ export class LocationSelectPage {
     let toast = this.toastCtrl.create({
       message: message,
       duration: 2000,
-      position: 'bottom'
+      position: 'top'
     });
 
     toast.onDidDismiss(() => {

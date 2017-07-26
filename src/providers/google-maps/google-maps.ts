@@ -19,6 +19,10 @@ export class GoogleMapsProvider {
   currentMarker: any;
   apiKey: string = "AIzaSyAxKKrdC08TkrbHw5SNmQzhW6TareXXFwI";
 
+
+
+  currentMarkers: any[] = [];
+
   constructor(public connectivityService: ConnectivityServiceProvider) {
 
   }
@@ -93,12 +97,12 @@ export class GoogleMapsProvider {
     this.mapInitialised = true;
 
     return new Promise((resolve) => {
-        let mapOptions = {
-          zoom: 14,
-          mapTypeId: google.maps.MapTypeId.ROADMAP
-        }
-        this.map = new google.maps.Map(this.mapElement, mapOptions);
-        resolve(true);
+      let mapOptions = {
+        zoom: 14,
+        mapTypeId: google.maps.MapTypeId.ROADMAP
+      }
+      this.map = new google.maps.Map(this.mapElement, mapOptions);
+      resolve(true);
     });
 
   }
@@ -125,7 +129,7 @@ export class GoogleMapsProvider {
     var marker = new google.maps.Marker({
       position: latLon,
       animation: google.maps.Animation.DROP,
-      visible : true
+      visible: true
       // title: "Hello World!"
     });
 
@@ -139,39 +143,75 @@ export class GoogleMapsProvider {
     return marker
   }
 
-  addBusinessMarker(business) {
-    var contentString = '<h1>hello</h1>';
+  addBusinessMarkers(businesss) {
 
-    let infoWindow = new google.maps.InfoWindow({
-      content: `
+    this.currentMarkers = this.currentMarkers.filter(item => {
+
+      var match = businesss.findIndex(i => {
+        return i.lat === item.lat && i.lng === item.lng;
+      });
+      if (match >= 0) {
+        return true
+      }
+      item.marker.setMap(null);
+      return false;
+    });
+
+
+    let me = this;
+    let needToAdd = businesss.filter(function (el) {
+      var match = me.currentMarkers.findIndex(i => {
+        return i.lat === el.lat && i.lng === el.lng;
+      });
+      // console.log(match);
+      return match < 0;
+    });
+
+    needToAdd.forEach(business => {
+      console.log("add")
+      var contentString = '<h1>hello</h1>';
+
+      let infoWindow = new google.maps.InfoWindow({
+        content: `
             <h1 id = "${business._uid}">${business.name}</h1>
       `
-    });
-    google.maps.event.addListenerOnce(infoWindow, 'domready', () => {
-      document.getElementById(business._uid).addEventListener('click', () => {
-        // alert(business.name);
-        this.navCtrl.push("BusinessPromosPage", { key: business._uid });
       });
+      google.maps.event.addListenerOnce(infoWindow, 'domready', () => {
+        document.getElementById(business._uid).addEventListener('click', () => {
+          // alert(business.name);
+          this.navCtrl.push("BusinessPromosPage", { key: business._uid });
+        });
+      });
+
+
+      // var infowindow = new google.maps.InfoWindow({
+      //   content: contentString
+      // });
+      let latLng = new google.maps.LatLng(business.lat, business.lng);
+      var marker = new google.maps.Marker({
+        position: latLng,
+        animation: google.maps.Animation.DROP,
+        visible: true
+        // title: "Hello World!"
+      });
+
+      marker.addListener('click', function () {
+        infoWindow.open(this.map, marker);
+      });
+
+      marker.setMap(this.map);
+      business.marker = marker;
+      // business.latString = business.lat.toString();
+      // business.lngString = business.lng.toString();
+
+      this.currentMarkers.push(business);
     });
 
 
-    // var infowindow = new google.maps.InfoWindow({
-    //   content: contentString
-    // });
-    let latLng = new google.maps.LatLng(business.lat, business.lng);
-    var marker = new google.maps.Marker({
-      position: latLng,
-      animation: google.maps.Animation.DROP,
-      visible : true
-      // title: "Hello World!"
-    });
+    console.log(this.currentMarkers);
 
-    marker.addListener('click', function () {
-      infoWindow.open(this.map, marker);
-    });
 
-    marker.setMap(this.map);
-
+    // return marker;
 
   }
 

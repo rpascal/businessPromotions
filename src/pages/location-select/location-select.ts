@@ -1,4 +1,4 @@
-import { NavController, Platform, ViewController, IonicPage, Events } from 'ionic-angular';
+import { NavController, Platform, ViewController, IonicPage, Events, LoadingController, Loading } from 'ionic-angular';
 import { Component, ElementRef, ViewChild, NgZone } from '@angular/core';
 
 import { GoogleMapComponent } from '../../components/google-map/google-map'
@@ -6,7 +6,10 @@ import { GoogleMapComponent } from '../../components/google-map/google-map'
 import { GoogleMapPlacesProvider } from '../../providers/google-map-places/google-map-places'
 import { BusinessesDataProvider } from '../../providers/businesses-data/businesses-data'
 
-import { Geolocation } from '@ionic-native/geolocation';
+// import { Geolocation } from '@ionic-native/geolocation';
+
+import { CurrentLocationProvider } from '../../providers/current-location/current-location';
+
 
 import { ToastController } from 'ionic-angular';
 
@@ -24,10 +27,12 @@ export class LocationSelectPage {
   places: any = [];
   query: string;
 
+  loader: Loading;
+
   constructor(public events: Events, public navCtrl: NavController, public zone: NgZone, private toastCtrl: ToastController,
     public platform: Platform, public googleMapPlaces: GoogleMapPlacesProvider,
-    public bdp: BusinessesDataProvider,
-    public geolocation: Geolocation) {
+    public bdp: BusinessesDataProvider, public curLoc: CurrentLocationProvider,
+    public loadingCtrl: LoadingController) {
   }
 
 
@@ -35,40 +40,56 @@ export class LocationSelectPage {
 
 
   ionViewDidLoad(): void {
-
-    console.log("load")
-    this.geolocation.getCurrentPosition().then(currentLocation => {
-
-      this.presentToast("Lat:" + currentLocation.coords.latitude + " long" + currentLocation.coords.longitude);
-      this.initializeMap({ lat: currentLocation.coords.latitude, lng: currentLocation.coords.longitude });
-
-
-    }).catch(err => {
-      //41.059481, -82.023820
-      this.initializeMap({ lat: 41.059481, lng: -82.023820 });
-      this.presentToast("Default starting location used")
+    this.loader = this.loadingCtrl.create({
+      content: 'Please wait...'
     });
 
+    this.loader.present()
+    this.curLoc.getCurrentocation().then(res => {
+      this.initializeMap(res);
+    })
   }
 
   initializeMap(currentPosition: { lat: number, lng: number }) {
     this.mapElement.init().then(map => {
       this.googleMapPlaces.init(map);
-
-      //this.mapElement.setCenter(currentPosition.lat, currentPosition.lng)
+      // this.loader.dismiss();
+      this.mapElement.setCenter(currentPosition.lat, currentPosition.lng)
       //default position to where the markers will show up
-      this.mapElement.setCenter(41.059481, -82.023820)
+      // this.mapElement.setCenter(41.059481, -82.023820)
 
       this.bdp.getBusinessData().subscribe(businesses => {
+        console.log("business subscript")
+        const loader = this.loadingCtrl.create({
+          content: 'Please wait...'
+        });
+        loader.present()
         this.zone.run(() => {
           this.mapElement.maps.addBusinessMarkers(businesses)
-          // this.presentToast("done")
-        })
+          loader.dismiss();
+          if (this.loader) {
+            console.log("dismiss")
+            this.loader.dismiss();
+            this.loader = null;
+          }
+        });
       });
+    })
 
-    });
 
   }
+
+  presentLoadingDefault() {
+    let loading = this.loadingCtrl.create({
+      content: 'Please wait...'
+    });
+
+    //loading.present();
+    return loading;
+  }
+
+
+
 
 
   searchPlace() {

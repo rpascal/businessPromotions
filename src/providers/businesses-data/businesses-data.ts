@@ -30,7 +30,11 @@ import { BehaviorSubject } from "rxjs/BehaviorSubject";
 @Injectable()
 export class BusinessesDataProvider {
 
-  private root: string = "_businesses";
+  // private root: string = "_businesses";
+  private root: string = "_businessDummt";
+
+
+
   private location: BehaviorSubject<{ lat: number, lng: number }> = new BehaviorSubject({ lat: 41.059481, lng: -82.023820 });
   private businesses = [];
 
@@ -64,11 +68,14 @@ export class BusinessesDataProvider {
 
   getBusinessData() {
     return Observable.combineLatest(this.db.list(`${this.root}`), this.location, (x, y) => ({ x, y })).map(data => {
+      // return data.x;
+      // console.log()
       let temp = this.applyHaversine(data.x, data.y);
       temp.sort((locationA, locationB) => {
         return locationA.distance - locationB.distance;
       });
-      return temp.filter((item) => item.distance <= 50);
+      return temp;
+      // return temp.filter((item) => item.distance <= 50);
       // return temp;
     });
   }

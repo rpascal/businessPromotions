@@ -168,7 +168,7 @@ export class GoogleMapsProvider {
     });
 
     needToAdd.forEach(business => {
-      console.log("add")
+      // console.log("add")
       var contentString = '<h1>hello</h1>';
 
       let infoWindow = new google.maps.InfoWindow({
@@ -208,7 +208,7 @@ export class GoogleMapsProvider {
     });
 
 
-    console.log(this.currentMarkers);
+    //console.log(this.currentMarkers);
 
 
     // return marker;

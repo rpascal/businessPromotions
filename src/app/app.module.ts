@@ -20,6 +20,7 @@ import { UserDataProvider } from '../providers/user-data/user-data';
 import { PromosDataProvider } from '../providers/promos-data/promos-data';
 import { BusinessesDataProvider } from '../providers/businesses-data/businesses-data';
 import { Geolocation } from '@ionic-native/geolocation';
+import { CurrentLocationProvider } from '../providers/current-location/current-location';
 
 
 
@@ -50,7 +51,8 @@ import { Geolocation } from '@ionic-native/geolocation';
     UserDataProvider,
     PromosDataProvider,
     BusinessesDataProvider,
-    Geolocation
+    Geolocation,
+    CurrentLocationProvider
   ]
 })
 export class AppModule { }

@@ -4,7 +4,7 @@ import { BusinessesDataProvider } from '../../providers/businesses-data/business
 // import { Geolocation } from '@ionic-native/geolocation';
 
 import { CurrentLocationProvider } from '../../providers/current-location/current-location';
-
+import {GoogleMapsProvider} from '../../providers/google-maps/google-maps'
 
 
 /**
@@ -24,7 +24,7 @@ export class ListPage {
 
   constructor(public bdp: BusinessesDataProvider, public navCtrl: NavController,
     public zone: NgZone, public navParams: NavParams, public loadingCtrl: LoadingController,
-    public events: Events, public curLoc: CurrentLocationProvider) {
+    public events: Events, public curLoc: CurrentLocationProvider,public maps : GoogleMapsProvider) {
   }
 
   ionViewDidLoad() {
@@ -51,7 +51,7 @@ export class ListPage {
 
 
     //this.businesses = this.bdp.getBusinessData()
-    this.bdp.getBusinessData().subscribe(data => {
+    this.maps.getLocations().subscribe(data => {
 
       const loader = this.loadingCtrl.create({
         content: 'Please wait...'

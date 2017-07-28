@@ -26,6 +26,10 @@ export class CurrentLocationProvider {
 
   }
 
+  getDefault(){
+    return { lat: 41.059481, lng: -82.023820 };
+  }
+
   watchLocation() {
     return this.geolocation.watchPosition();
   }

@@ -1,8 +1,13 @@
-import { Injectable } from '@angular/core';
+import { Injectable, NgZone } from '@angular/core';
 import { Platform } from 'ionic-angular';
 import { ConnectivityServiceProvider } from '../connectivity-service/connectivity-service';
-
+import 'rxjs/add/observable/combineLatest';
+import { BehaviorSubject } from "rxjs/BehaviorSubject";
+import { Observable } from "rxjs/Observable";
+import { BusinessesDataProvider } from '../businesses-data/businesses-data'
 declare var google;
+import { CurrentLocationProvider } from '../current-location/current-location'
+
 
 @Injectable()
 export class GoogleMapsProvider {
@@ -18,21 +23,59 @@ export class GoogleMapsProvider {
   mapLoadedObserver: any;
   currentMarker: any;
   apiKey: string = "AIzaSyAxKKrdC08TkrbHw5SNmQzhW6TareXXFwI";
+  private location: BehaviorSubject<{ lat: number, lng: number }> = new BehaviorSubject(this.currentLocationDataProvider.getDefault());
 
+  manualLocationChange = false;
 
 
   currentMarkers: any[] = [];
 
-  constructor(public connectivityService: ConnectivityServiceProvider) {
-
+  constructor(public connectivityService: ConnectivityServiceProvider,
+    public businessDataProvider: BusinessesDataProvider,
+    public zone: NgZone,
+    public currentLocationDataProvider: CurrentLocationProvider) {
+    this.currentLocationDataProvider.getCurrentocation().then(data => {
+      this.location.next(data)
+    })
+    currentLocationDataProvider.watchLocation().subscribe(data => {
+      if (!this.manualLocationChange)
+        this.location.next({ lat: data.coords.latitude, lng: data.coords.longitude })
+    })
+    // this.location.subscribe(location => {
+    //   this.setCenter(location);
+    // })
   }
 
-  getMap(){
+
+  setCenter(newCenter) {
+    this.changeLocation(newCenter);
+    this.getMap().setCenter(newCenter);
+  }
+
+  changeLocation(newLocation) {
+    this.manualLocationChange = true;
+    this.location.next(newLocation);
+  }
+
+
+  getLocations() {
+    return Observable.combineLatest(this.businessDataProvider.getBusinesses(), this.location, (x, y) => ({ x, y })).map(data => {
+      let temp = this.applyHaversine(data.x, data.y);
+      temp.sort((locationA, locationB) => {
+        return locationA.distance - locationB.distance;
+      });
+      //return temp;
+      return temp.filter((item) => item.distance <= 250);
+      // return temp;
+    });
+  }
+
+  getMap() {
     return this.map;
   }
-  getMapCenter(){
+  getMapCenter() {
     var center = this.getMap().getCenter();
-    return {lat : center.lat(), lng : center.lng()};
+    return { lat: center.lat(), lng: center.lng() };
   }
 
 
@@ -249,6 +292,13 @@ export class GoogleMapsProvider {
       this.pleaseConnect.style.display = "none";
     }
 
+    this.getLocations().subscribe(location => {
+      console.log("business subscript")
+      this.zone.run(() => {
+        this.addBusinessMarkers(location)
+      });
+    });
+
   }
 
   addConnectivityListeners(): void {
@@ -279,5 +329,65 @@ export class GoogleMapsProvider {
     });
 
   }
+
+  applyHaversine(locations, currentPosition: { lat: number, lng: number }) {
+    //return new Promise((resolve, reject) => {
+
+    let usersLocation = {
+      lat: currentPosition.lat,
+      lng: currentPosition.lng
+    };
+
+    locations.map((location) => {
+
+      let placeLocation = {
+        lat: location.lat,
+        lng: location.lng
+      };
+
+      location.distance = this.getDistanceBetweenPoints(
+        usersLocation,
+        placeLocation,
+        'miles'
+      ).toFixed(2);
+    });
+
+    return locations;
+
+    // resolve(locations); // As soon as this is called, the "then" in will be executed in the function below.
+
+
+    // });
+  }
+  getDistanceBetweenPoints(start, end, units) {
+
+    let earthRadius = {
+      miles: 3958.8,
+      km: 6371
+    };
+
+    let R = earthRadius[units || 'miles'];
+    let lat1 = start.lat;
+    let lon1 = start.lng;
+    let lat2 = end.lat;
+    let lon2 = end.lng;
+
+    let dLat = this.toRad((lat2 - lat1));
+    let dLon = this.toRad((lon2 - lon1));
+    let a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(this.toRad(lat1)) * Math.cos(this.toRad(lat2)) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+    let c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    let d = R * c;
+
+    return d;
+
+  }
+
+  toRad(x) {
+    return x * Math.PI / 180;
+  }
+
 
 }

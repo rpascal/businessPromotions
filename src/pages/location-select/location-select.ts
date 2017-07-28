@@ -5,7 +5,7 @@ import { GoogleMapComponent } from '../../components/google-map/google-map'
 
 import { GoogleMapPlacesProvider } from '../../providers/google-map-places/google-map-places'
 import { BusinessesDataProvider } from '../../providers/businesses-data/businesses-data'
-
+import { GoogleMapsProvider } from '../../providers/google-maps/google-maps'
 // import { Geolocation } from '@ionic-native/geolocation';
 
 import { CurrentLocationProvider } from '../../providers/current-location/current-location';
@@ -35,7 +35,8 @@ export class LocationSelectPage {
   constructor(public events: Events, public navCtrl: NavController, public zone: NgZone, private toastCtrl: ToastController,
     public platform: Platform, public googleMapPlaces: GoogleMapPlacesProvider,
     public bdp: BusinessesDataProvider, public curLoc: CurrentLocationProvider,
-    public loadingCtrl: LoadingController, public popover: PopoverController) {
+    public loadingCtrl: LoadingController, public popover: PopoverController,
+    public maps: GoogleMapsProvider) {
   }
 
   // presentPopover(myEvent) {
@@ -48,7 +49,8 @@ export class LocationSelectPage {
   center() {
     var center = this.mapElement.getCenter()
     console.log(center)
-    this.bdp.changeLocation(center);
+    // this.maps.setCenter
+    this.maps.changeLocation(center);
     this.mapElement.setCenter(center.lat, center.lng);
     // console.log()
   }
@@ -56,11 +58,11 @@ export class LocationSelectPage {
 
 
   ionViewDidLoad(): void {
-    this.loader = this.loadingCtrl.create({
-      content: 'Please wait...'
-    });
+    // this.loader = this.loadingCtrl.create({
+    //   content: 'Please wait...'
+    // });
 
-    this.loader.present()
+    // this.loader.present()
     this.curLoc.getCurrentocation().then(res => {
       this.initializeMap(res);
     })
@@ -74,22 +76,22 @@ export class LocationSelectPage {
       //default position to where the markers will show up
       // this.mapElement.setCenter(41.059481, -82.023820)
 
-      this.bdp.getBusinessData().subscribe(businesses => {
-        console.log("business subscript")
-        const loader = this.loadingCtrl.create({
-          content: 'Please wait...'
-        });
-        loader.present()
-        this.zone.run(() => {
-          this.mapElement.maps.addBusinessMarkers(businesses)
-          loader.dismiss();
-          if (this.loader) {
-            console.log("dismiss")
-            this.loader.dismiss();
-            this.loader = null;
-          }
-        });
-      });
+      // this.bdp.getBusinessData().subscribe(businesses => {
+      //   console.log("business subscript")
+      //   const loader = this.loadingCtrl.create({
+      //     content: 'Please wait...'
+      //   });
+      //   loader.present()
+      //   this.zone.run(() => {
+      //     this.mapElement.maps.addBusinessMarkers(businesses)
+      //     loader.dismiss();
+      //     if (this.loader) {
+      //       console.log("dismiss")
+      //       this.loader.dismiss();
+      //       this.loader = null;
+      //     }
+      //   });
+      // });
     })
 
 
@@ -122,7 +124,7 @@ export class LocationSelectPage {
   selectPlace(place) {
 
     this.googleMapPlaces.getSelectedPlaceDetails(place).then(res => {
-      this.bdp.changeLocation({ lat: res.lat, lng: res.lng });
+      this.maps.changeLocation({ lat: res.lat, lng: res.lng });
       this.zone.run(() => {
         this.places = [];
         this.mapElement.setCenter(res.lat, res.lng)

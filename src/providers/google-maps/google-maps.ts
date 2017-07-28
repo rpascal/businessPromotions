@@ -27,6 +27,15 @@ export class GoogleMapsProvider {
 
   }
 
+  getMap(){
+    return this.map;
+  }
+  getMapCenter(){
+    var center = this.getMap().getCenter();
+    return {lat : center.lat(), lng : center.lng()};
+  }
+
+
   init(mapElement: any, pleaseConnect: any, navCtrl): Promise<any> {
 
     this.mapElement = mapElement;

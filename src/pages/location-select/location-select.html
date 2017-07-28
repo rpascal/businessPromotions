@@ -3,15 +3,24 @@
     <button left ion-button menuToggle>
       <ion-icon name="menu"></ion-icon>
     </button>
+     <button ion-button (click)="center()">Change Area</button> 
+    <ion-searchbar [(ngModel)]="query" (ionInput)="searchPlace()"></ion-searchbar>
 
-<ion-searchbar [(ngModel)]="query" (ionInput)="searchPlace()"></ion-searchbar>
 
+    <!-- <ion-buttons end>
+      <button ion-button icon-only (click)="openModal()">
+        <ion-icon name="options"></ion-icon>
+      </button>
+    </ion-buttons> -->
 
   </ion-navbar>
 
+
+
+
   <ion-list>
     <!--(touchstart)="selectPlace(place)"  -->
-    <ion-item *ngFor="let place of places" (click)="selectPlace(place)" >{{place.description}}</ion-item>
+    <ion-item *ngFor="let place of places" (click)="selectPlace(place)">{{place.description}}</ion-item>
   </ion-list>
 
 </ion-header>

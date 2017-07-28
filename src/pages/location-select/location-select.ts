@@ -13,6 +13,9 @@ import { CurrentLocationProvider } from '../../providers/current-location/curren
 
 import { ToastController } from 'ionic-angular';
 
+
+import { PopoverController } from 'ionic-angular';
+
 declare var google;
 
 @IonicPage()
@@ -32,10 +35,23 @@ export class LocationSelectPage {
   constructor(public events: Events, public navCtrl: NavController, public zone: NgZone, private toastCtrl: ToastController,
     public platform: Platform, public googleMapPlaces: GoogleMapPlacesProvider,
     public bdp: BusinessesDataProvider, public curLoc: CurrentLocationProvider,
-    public loadingCtrl: LoadingController) {
+    public loadingCtrl: LoadingController, public popover: PopoverController) {
   }
 
+  // presentPopover(myEvent) {
+  //   let popover = this.popoverCtrl.create(PopoverPage);
+  //   popover.present({
+  //     ev: myEvent
+  //   });
+  // }
 
+  center() {
+    var center = this.mapElement.getCenter()
+    console.log(center)
+    this.bdp.changeLocation(center);
+    this.mapElement.setCenter(center.lat, center.lng);
+    // console.log()
+  }
 
 
 

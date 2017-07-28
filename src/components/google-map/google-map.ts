@@ -28,8 +28,11 @@ export class GoogleMapComponent {
   }
 
   setCenter(lat, lng) {
-
     this.maps.map.setCenter({ lat: lat, lng: lng });
+  }
+
+  getCenter(){
+    return this.maps.getMapCenter();
   }
 
 

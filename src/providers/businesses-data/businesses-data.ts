@@ -68,14 +68,12 @@ export class BusinessesDataProvider {
 
   getBusinessData() {
     return Observable.combineLatest(this.db.list(`${this.root}`), this.location, (x, y) => ({ x, y })).map(data => {
-      // return data.x;
-      // console.log()
       let temp = this.applyHaversine(data.x, data.y);
       temp.sort((locationA, locationB) => {
         return locationA.distance - locationB.distance;
       });
-      return temp;
-      // return temp.filter((item) => item.distance <= 50);
+      //return temp;
+      return temp.filter((item) => item.distance <= 250);
       // return temp;
     });
   }

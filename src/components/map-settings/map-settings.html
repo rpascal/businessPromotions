@@ -1,0 +1,31 @@
+<div padding>
+  <button full ion-button (click)="searchThisArea()">Search this area</button>
+<!--(ionChange)="mcqAnswer($event)" (ionChange)="changeRadius()"  -->
+  <ion-list radio-group  [(ngModel)]="radius">
+
+    <ion-list-header>
+      Radius
+    </ion-list-header>
+
+    <ion-item>
+      <ion-label>5 Miles</ion-label>
+      <ion-radio (ionSelect)="changeRadius($event)" value="5"></ion-radio>
+    </ion-item>
+
+    <ion-item>
+      <ion-label>50 Miles</ion-label>
+      <ion-radio (ionSelect)="changeRadius($event)" value="50"></ion-radio>
+    </ion-item>
+
+    <ion-item>
+      <ion-label>200 Miles</ion-label>
+      <ion-radio (ionSelect)="changeRadius($event)" value="200"></ion-radio>
+    </ion-item>
+
+    <ion-item>
+      <ion-label>500 Miles</ion-label>
+      <ion-radio (ionSelect)="changeRadius($event)" value="500"></ion-radio>
+    </ion-item>
+  </ion-list>
+
+</div>

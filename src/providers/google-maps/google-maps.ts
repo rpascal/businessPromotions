@@ -7,13 +7,18 @@ import { Observable } from "rxjs/Observable";
 import { BusinessesDataProvider } from '../businesses-data/businesses-data'
 declare var google;
 import { CurrentLocationProvider } from '../current-location/current-location'
-
+import 'rxjs/add/operator/take';
+import { MathOperationsProvider } from '../math-operations/math-operations'
 
 @Injectable()
 export class GoogleMapsProvider {
 
 
+  locationCircle;
+  // searchRadius = 250;
   navCtrl: any;
+
+  public defaultRadius = 200;
 
   mapElement: any;
   pleaseConnect: any;
@@ -24,6 +29,9 @@ export class GoogleMapsProvider {
   currentMarker: any;
   apiKey: string = "AIzaSyAxKKrdC08TkrbHw5SNmQzhW6TareXXFwI";
   private location: BehaviorSubject<{ lat: number, lng: number }> = new BehaviorSubject(this.currentLocationDataProvider.getDefault());
+  private radius: BehaviorSubject<number> = new BehaviorSubject(this.defaultRadius);
+
+
 
   manualLocationChange = false;
 
@@ -33,7 +41,8 @@ export class GoogleMapsProvider {
   constructor(public connectivityService: ConnectivityServiceProvider,
     public businessDataProvider: BusinessesDataProvider,
     public zone: NgZone,
-    public currentLocationDataProvider: CurrentLocationProvider) {
+    public currentLocationDataProvider: CurrentLocationProvider,
+    public math: MathOperationsProvider) {
     this.currentLocationDataProvider.getCurrentocation().then(data => {
       this.location.next(data)
     })
@@ -54,19 +63,18 @@ export class GoogleMapsProvider {
 
   changeLocation(newLocation) {
     this.manualLocationChange = true;
+    this.locationCircle.setCenter(new google.maps.LatLng(newLocation.lat, newLocation.lng));
     this.location.next(newLocation);
   }
 
 
   getLocations() {
-    return Observable.combineLatest(this.businessDataProvider.getBusinesses(), this.location, (x, y) => ({ x, y })).map(data => {
-      let temp = this.applyHaversine(data.x, data.y);
+    return Observable.combineLatest(this.businessDataProvider.getBusinesses(), this.location, this.radius, (x, y, z) => ({ x, y, z })).map(data => {
+      let temp = this.math.applyHaversine(data.x, data.y);
       temp.sort((locationA, locationB) => {
         return locationA.distance - locationB.distance;
       });
-      //return temp;
-      return temp.filter((item) => item.distance <= 250);
-      // return temp;
+      return temp.filter((item) => +item.distance <= data.z);
     });
   }
 
@@ -235,10 +243,6 @@ export class GoogleMapsProvider {
         });
       });
 
-
-      // var infowindow = new google.maps.InfoWindow({
-      //   content: contentString
-      // });
       let latLng = new google.maps.LatLng(business.lat, business.lng);
       var marker = new google.maps.Marker({
         position: latLng,
@@ -253,28 +257,13 @@ export class GoogleMapsProvider {
 
       marker.setMap(this.map);
       business.marker = marker;
-      // business.latString = business.lat.toString();
-      // business.lngString = business.lng.toString();
-
       this.currentMarkers.push(business);
     });
-
-
-    //console.log(this.currentMarkers);
-
-
-    // return marker;
-
   }
 
   addMarker(latLon) {
     var marker = this.createMarker(latLon);
     marker.setMap(this.map);
-    //  console.log(this.map)
-
-
-    // console.log(this.map)
-
   }
 
 
@@ -286,13 +275,38 @@ export class GoogleMapsProvider {
 
   }
 
+  changeRadius(radius) {
+    console.log('change radius : ' + radius)
+    this.radius.next(radius);
+  }
+
   enableMap(): void {
 
     if (this.pleaseConnect) {
       this.pleaseConnect.style.display = "none";
     }
 
+    this.locationCircle = new google.maps.Circle({
+      strokeColor: '#0000ff',
+      strokeOpacity: 0.7,
+      strokeWeight: 2,
+      fillColor: '#0000ff',
+      fillOpacity: 0.12,
+      map: this.getMap(),
+      // radius: this.math.mileToMeter(this.searchRadius)
+    });
+
+    this.radius.subscribe(radius => {
+      this.locationCircle.setRadius(this.math.mileToMeter(radius));
+      this.defaultRadius = radius
+    })
+
+    // this.location.take(1).subscribe(data=>{
+
+    // })
+
     this.getLocations().subscribe(location => {
+      console.log(location, "location")
       console.log("business subscript")
       this.zone.run(() => {
         this.addBusinessMarkers(location)
@@ -323,71 +337,12 @@ export class GoogleMapsProvider {
     });
 
     this.connectivityService.watchOffline().subscribe(() => {
-
       this.disableMap();
-
     });
 
   }
 
-  applyHaversine(locations, currentPosition: { lat: number, lng: number }) {
-    //return new Promise((resolve, reject) => {
 
-    let usersLocation = {
-      lat: currentPosition.lat,
-      lng: currentPosition.lng
-    };
-
-    locations.map((location) => {
-
-      let placeLocation = {
-        lat: location.lat,
-        lng: location.lng
-      };
-
-      location.distance = this.getDistanceBetweenPoints(
-        usersLocation,
-        placeLocation,
-        'miles'
-      ).toFixed(2);
-    });
-
-    return locations;
-
-    // resolve(locations); // As soon as this is called, the "then" in will be executed in the function below.
-
-
-    // });
-  }
-  getDistanceBetweenPoints(start, end, units) {
-
-    let earthRadius = {
-      miles: 3958.8,
-      km: 6371
-    };
-
-    let R = earthRadius[units || 'miles'];
-    let lat1 = start.lat;
-    let lon1 = start.lng;
-    let lat2 = end.lat;
-    let lon2 = end.lng;
-
-    let dLat = this.toRad((lat2 - lat1));
-    let dLon = this.toRad((lon2 - lon1));
-    let a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(this.toRad(lat1)) * Math.cos(this.toRad(lat2)) *
-      Math.sin(dLon / 2) *
-      Math.sin(dLon / 2);
-    let c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    let d = R * c;
-
-    return d;
-
-  }
-
-  toRad(x) {
-    return x * Math.PI / 180;
-  }
 
 
 }

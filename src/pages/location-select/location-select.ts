@@ -14,6 +14,10 @@ import { CurrentLocationProvider } from '../../providers/current-location/curren
 import { ToastController } from 'ionic-angular';
 
 
+import { MapSettingsComponent } from '../../components/map-settings/map-settings'
+
+
+
 import { PopoverController } from 'ionic-angular';
 
 declare var google;
@@ -39,30 +43,9 @@ export class LocationSelectPage {
     public maps: GoogleMapsProvider) {
   }
 
-  // presentPopover(myEvent) {
-  //   let popover = this.popoverCtrl.create(PopoverPage);
-  //   popover.present({
-  //     ev: myEvent
-  //   });
-  // }
-
-  center() {
-    var center = this.mapElement.getCenter()
-    console.log(center)
-    // this.maps.setCenter
-    this.maps.changeLocation(center);
-    this.mapElement.setCenter(center.lat, center.lng);
-    // console.log()
-  }
-
 
 
   ionViewDidLoad(): void {
-    // this.loader = this.loadingCtrl.create({
-    //   content: 'Please wait...'
-    // });
-
-    // this.loader.present()
     this.curLoc.getCurrentocation().then(res => {
       this.initializeMap(res);
     })
@@ -157,32 +140,16 @@ export class LocationSelectPage {
   }
 
 
-  generateRandomPoint(center, radius) {
-    var x0 = center.lng;
-    var y0 = center.lat;
-    // Convert Radius from meters to degrees.
-    var rd = radius / 111300;
+  openSettings(ev) {
+    let popover = this.popover.create(MapSettingsComponent, {
+      page: this,
+    });
 
-    var u = Math.random();
-    var v = Math.random();
+    popover.present({
+      ev: ev
+    });
 
-    var w = rd * Math.sqrt(u);
-    var t = 2 * Math.PI * v;
-    var x = w * Math.cos(t);
-    var y = w * Math.sin(t);
 
-    var xp = x / Math.cos(y0);
-
-    // Resulting point.
-    return { 'lat': y + y0, 'lng': xp + x0 };
   }
-  generateRandomPoints(center, radius, count) {
-    var points = [];
-    for (var i = 0; i < count; i++) {
-      points.push(this.generateRandomPoint(center, radius));
-    }
-    return points;
-  }
-
 
 }

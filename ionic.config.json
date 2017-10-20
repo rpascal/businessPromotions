@@ -1,5 +1,6 @@
 {
   "name": "businessPromotions",
   "app_id": "53c5dad1",
-  "type": "ionic-angular"
+  "type": "ionic-angular",
+  "integrations": {}
 }
